@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  * 帖子接口
@@ -144,7 +146,14 @@ public class InterfaceInfoController {
         String secretKey = loginUser.getSecretKey();
         DaApiClient tempApiClient = new DaApiClient(accessKey, secretKey);
         Gson gson = new Gson();
-        com.da.daapiclientsdk.model.User user = gson.fromJson(invokeInterfaceInfoRequest.getUserRequestParams(), com.da.daapiclientsdk.model.User.class);
+        //转码，解决中文乱码问题
+        String params = invokeInterfaceInfoRequest.getUserRequestParams();
+//        try {
+//            params = URLDecoder.decode(params,"UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            throw new RuntimeException(e);
+//        }
+        com.da.daapiclientsdk.model.User user = gson.fromJson(params, com.da.daapiclientsdk.model.User.class);
         String usernameByPost = tempApiClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);
     }
