@@ -7,7 +7,7 @@
     <resultMap id="BaseResultMap" type="com.yupi.springbootinit.model.entity.UserInterfaceInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="interfaceInfoId" column="interfaceInfo_id" jdbcType="BIGINT"/>
+            <result property="interfaceInfoId" column="interface_info_id" jdbcType="BIGINT"/>
             <result property="totalNum" column="total_num" jdbcType="INTEGER"/>
             <result property="leftNum" column="left_num" jdbcType="INTEGER"/>
             <result property="status" column="status" jdbcType="INTEGER"/>
@@ -17,7 +17,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,user_id,interfaceInfo_id,
+        id,user_id,interface_info_id,
         total_num,left_num,status,
         create_time,update_time,is_delete
     </sql>

@@ -102,7 +102,3 @@ knife4j:
         api-rule-resources:
           - com.yupi.springbootinit.controller
 
-daapi:
-  client:
-    access-key: dada
-    secret-key: 123456

@@ -1,5 +1,7 @@
 package com.yupi.springbootinit.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.da.daapiclientsdk.client.DaApiClient;
 import com.yupi.springbootinit.annotation.AuthCheck;
@@ -10,10 +12,7 @@ import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
-import com.yupi.springbootinit.model.dto.userInterfaceInfo.InvokeCountRequest;
-import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoAddRequest;
-import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoQueryRequest;
-import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoUpdateRequest;
+import com.yupi.springbootinit.model.dto.userInterfaceInfo.*;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.entity.UserInterfaceInfo;
 import com.yupi.springbootinit.service.UserInterfaceInfoService;
@@ -40,12 +39,12 @@ public class UserInterfaceInfoController {
     private UserService userService;
 
     /**
-     * 接口次数变化
+     * 接口次数
      * @param invokeCountRequest
      * @return
      */
     @PostMapping("/invokeCount")
-    public BaseResponse<Boolean> invokeCount(@RequestBody InvokeCountRequest invokeCountRequest){
+    public boolean invokeCount(@RequestBody InvokeCountRequest invokeCountRequest){
         if(invokeCountRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -54,7 +53,36 @@ public class UserInterfaceInfoController {
         if(userId <= 0 || interfaceId <= 0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        return ResultUtils.success(userInterfaceInfoService.invokeCount(interfaceId, userId));
+        return userInterfaceInfoService.invokeCount(interfaceId, userId);
+    }
+
+    /**
+     * 校验调用次数
+     * @param checkCount
+     * @return
+     */
+    @PostMapping("/checkCount")
+    public boolean checkCount(@RequestBody CheckCountRequest checkCount){
+        if(checkCount == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long userId = checkCount.getUserId();
+        long interfaceId = checkCount.getInterfaceId();
+        if(userId <= 0 || interfaceId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LambdaQueryWrapper<UserInterfaceInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(UserInterfaceInfo::getUserId, userId);
+        wrapper.eq(UserInterfaceInfo::getInterfaceInfoId, interfaceId);
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getOne(wrapper);
+        if(userInterfaceInfo == null){
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 调用次数不足
+        if(userInterfaceInfo.getLeftNum() <= 0){
+            return false;
+        }
+        return true;
     }
 
 

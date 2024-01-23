@@ -156,9 +156,9 @@ public class InterfaceInfoController {
         if (invokeInterfaceInfoRequest == null || invokeInterfaceInfoRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long id = invokeInterfaceInfoRequest.getId();
+        long interfaceId = invokeInterfaceInfoRequest.getId();
         // 判断接口是否存在
-        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceId);
         if(interfaceInfo == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -173,8 +173,14 @@ public class InterfaceInfoController {
         Gson gson = new Gson();
         String params = invokeInterfaceInfoRequest.getUserRequestParams();
         com.da.daapiclientsdk.model.User user = gson.fromJson(params, com.da.daapiclientsdk.model.User.class);
-        String usernameByPost = tempApiClient.getUsernameByPost(user);
-        return ResultUtils.success(usernameByPost);
+        //TODO 需要动态传递url，然后选择调用哪个方法访问模拟接口（方案一：根据接口id 判断调用哪个接口）
+        if(interfaceInfo.getName().equalsIgnoreCase("getUsernameByPost")){
+            return ResultUtils.success(tempApiClient.getUsernameByPost(user));
+        }
+        if(interfaceInfo.getName().equalsIgnoreCase("getCurrentTime")){
+            return ResultUtils.success(tempApiClient.getCurrentTime());
+        }
+        return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
     }
 
 
