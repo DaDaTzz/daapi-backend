@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.da.daapiclientsdk.client.DaApiClient;
 import com.google.gson.Gson;
@@ -18,6 +19,7 @@ import com.yupi.springbootinit.model.enums.InterfaceStatesEnum;
 import com.yupi.springbootinit.service.InterfaceInfoService;
 import com.yupi.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +49,29 @@ public class InterfaceInfoController {
     private DaApiClient daApiClient;
 
     // region 增删改查
+
+
+    /**
+     * 校验接口是否存在
+     */
+    @PostMapping("/checkInterfaceInfo")
+    public InterfaceInfo checkInterfaceInfo(@RequestBody CheckInterfaceInfoRequest checkInterfaceInfoRequest){
+        if(checkInterfaceInfoRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String url = checkInterfaceInfoRequest.getUrl();
+        String method = checkInterfaceInfoRequest.getMethod();
+        if(StringUtils.isAnyBlank(url, method)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LambdaQueryWrapper<InterfaceInfo> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(InterfaceInfo::getUrl, url).eq(InterfaceInfo::getMethod, method);
+        InterfaceInfo interfaceInfo = interfaceInfoService.getOne(wrapper);
+        if(interfaceInfo == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return interfaceInfo;
+    }
 
     /**
      * 创建
@@ -146,13 +171,7 @@ public class InterfaceInfoController {
         String secretKey = loginUser.getSecretKey();
         DaApiClient tempApiClient = new DaApiClient(accessKey, secretKey);
         Gson gson = new Gson();
-        //转码，解决中文乱码问题
         String params = invokeInterfaceInfoRequest.getUserRequestParams();
-//        try {
-//            params = URLDecoder.decode(params,"UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            throw new RuntimeException(e);
-//        }
         com.da.daapiclientsdk.model.User user = gson.fromJson(params, com.da.daapiclientsdk.model.User.class);
         String usernameByPost = tempApiClient.getUsernameByPost(user);
         return ResultUtils.success(usernameByPost);

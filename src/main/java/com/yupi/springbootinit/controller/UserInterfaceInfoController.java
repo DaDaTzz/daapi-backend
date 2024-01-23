@@ -10,6 +10,7 @@ import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
+import com.yupi.springbootinit.model.dto.userInterfaceInfo.InvokeCountRequest;
 import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoAddRequest;
 import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoQueryRequest;
 import com.yupi.springbootinit.model.dto.userInterfaceInfo.UserInterfaceInfoUpdateRequest;
@@ -38,6 +39,23 @@ public class UserInterfaceInfoController {
     @Resource
     private UserService userService;
 
+    /**
+     * 接口次数变化
+     * @param invokeCountRequest
+     * @return
+     */
+    @PostMapping("/invokeCount")
+    public BaseResponse<Boolean> invokeCount(@RequestBody InvokeCountRequest invokeCountRequest){
+        if(invokeCountRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long userId = invokeCountRequest.getUserId();
+        long interfaceId = invokeCountRequest.getInterfaceId();
+        if(userId <= 0 || interfaceId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return ResultUtils.success(userInterfaceInfoService.invokeCount(interfaceId, userId));
+    }
 
 
     /**
