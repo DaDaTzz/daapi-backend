@@ -1,23 +1,19 @@
-package com.yupi.springbootinit.model.entity;
+package com.yupi.springbootinit.model.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * @TableName interface_info
- */
-@TableName(value ="interface_info")
+ * 接口调用次数分析视图（脱敏）
+ **/
 @Data
-public class InterfaceInfo implements Serializable {
+public class InterfaceVO implements Serializable {
     /**
      * 主键
      */
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -66,22 +62,12 @@ public class InterfaceInfo implements Serializable {
      */
     private Integer status;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
 
     /**
-     * 更新时间
+     * 总调用次数
      */
-    private Date updateTime;
+    private Integer totalNum;
 
-    /**
-     * 逻辑删除（0-未删除 1-已删除）
-     */
-    @TableLogic
-    private String isDelete;
 
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

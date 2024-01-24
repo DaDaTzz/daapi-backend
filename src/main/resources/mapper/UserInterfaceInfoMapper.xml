@@ -21,4 +21,10 @@
         total_num,left_num,status,
         create_time,update_time,is_delete
     </sql>
+    <select id="getInvokeCountTOPList" resultType="com.yupi.springbootinit.model.entity.UserInterfaceInfo">
+        select ui.interface_info_id,sum(ui.total_num) as 'totalNum' from user_interface_info ui
+        group by ui.interface_info_id order by totalNum limit #{limit};
+    </select>
+
+
 </mapper>

@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.controller;
 
+import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.da.daapiclientsdk.client.DaApiClient;
@@ -170,15 +171,13 @@ public class InterfaceInfoController {
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         DaApiClient tempApiClient = new DaApiClient(accessKey, secretKey);
-        Gson gson = new Gson();
-        String params = invokeInterfaceInfoRequest.getUserRequestParams();
-        com.da.daapiclientsdk.model.User user = gson.fromJson(params, com.da.daapiclientsdk.model.User.class);
-        //TODO 需要动态传递url，然后选择调用哪个方法访问模拟接口（方案一：根据接口id 判断调用哪个接口）
-        if(interfaceInfo.getName().equalsIgnoreCase("getUsernameByPost")){
-            return ResultUtils.success(tempApiClient.getUsernameByPost(user));
-        }
+        String params = StringUtils.isBlank(invokeInterfaceInfoRequest.getUserRequestParams()) ? "" : invokeInterfaceInfoRequest.getUserRequestParams();
+        //TODO 需要动态传递url，然后选择调用哪个方法访问模拟接口（方案一：根据接口名称 判断调用哪个接口）
         if(interfaceInfo.getName().equalsIgnoreCase("getCurrentTime")){
             return ResultUtils.success(tempApiClient.getCurrentTime());
+        }
+        if(interfaceInfo.getName().equalsIgnoreCase("getChineseName")){
+            return ResultUtils.success(tempApiClient.getChineseName(params));
         }
         return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
     }
@@ -202,8 +201,10 @@ public class InterfaceInfoController {
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
         // 判断接口是否可以调用
-        String name = daApiClient.getNameByGet("test");
-        if (name == null) {
+        //String name = daApiClient.getNameByGet("test");
+        String realUrl = oldInterfaceInfo.getUrl().replace("8101", "8102");
+        String result = HttpUtil.get(realUrl);
+        if (StringUtils.isBlank(result)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口调用失败");
         }
         InterfaceInfo interfaceInfo = new InterfaceInfo();
