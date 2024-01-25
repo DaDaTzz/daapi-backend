@@ -33,8 +33,8 @@ import java.util.HashMap;
 /**
  * 帖子接口
  *
- * 
- * 
+ *
+ *
  */
 @RestController
 @RequestMapping("/interfaceInfo")
@@ -57,19 +57,19 @@ public class InterfaceInfoController {
      * 校验接口是否存在
      */
     @PostMapping("/checkInterfaceInfo")
-    public InterfaceInfo checkInterfaceInfo(@RequestBody CheckInterfaceInfoRequest checkInterfaceInfoRequest){
-        if(checkInterfaceInfoRequest == null){
+    public InterfaceInfo checkInterfaceInfo(@RequestBody CheckInterfaceInfoRequest checkInterfaceInfoRequest) {
+        if (checkInterfaceInfoRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String url = checkInterfaceInfoRequest.getUrl();
         String method = checkInterfaceInfoRequest.getMethod();
-        if(StringUtils.isAnyBlank(url, method)){
+        if (StringUtils.isAnyBlank(url, method)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         LambdaQueryWrapper<InterfaceInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(InterfaceInfo::getUrl, url).eq(InterfaceInfo::getMethod, method);
         InterfaceInfo interfaceInfo = interfaceInfoService.getOne(wrapper);
-        if(interfaceInfo == null){
+        if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         return interfaceInfo;
@@ -161,11 +161,11 @@ public class InterfaceInfoController {
         long interfaceId = invokeInterfaceInfoRequest.getId();
         // 判断接口是否存在
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceId);
-        if(interfaceInfo == null){
+        if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 判断接口状态
-        if(interfaceInfo.getStatus() != InterfaceStatesEnum.online.getValue()){
+        if (interfaceInfo.getStatus() != InterfaceStatesEnum.online.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口非上线状态！");
         }
         User loginUser = userService.getLoginUser(request);
@@ -174,20 +174,26 @@ public class InterfaceInfoController {
         DaApiClient tempApiClient = new DaApiClient(accessKey, secretKey);
         String params = StringUtils.isBlank(invokeInterfaceInfoRequest.getUserRequestParams()) ? "" : invokeInterfaceInfoRequest.getUserRequestParams();
         //TODO 需要动态传递url，然后选择调用哪个方法访问模拟接口（方案一：根据接口名称 判断调用哪个接口）
-        if(interfaceInfo.getName().equalsIgnoreCase("getCurrentTime")){
+        String interfaceInfoName = interfaceInfo.getName();
+        if (interfaceInfoName.equalsIgnoreCase("getCurrentTime")) {
             return ResultUtils.success(tempApiClient.getCurrentTime());
-        } else if (interfaceInfo.getName().equalsIgnoreCase("getChineseName")) {
+        } else if (interfaceInfoName.equalsIgnoreCase("getChineseName")) {
             return ResultUtils.success(tempApiClient.getChineseName(params));
-        } else if (interfaceInfo.getName().equalsIgnoreCase("getAgeByBirthday")) {
+        } else if (interfaceInfoName.equalsIgnoreCase("getAgeByBirthday")) {
             return ResultUtils.success(tempApiClient.getAgeByBirthday(params));
-        } else if (interfaceInfo.getName().equalsIgnoreCase("getRandomImage")) {
+        } else if (interfaceInfoName.equalsIgnoreCase("getRandomImage")) {
             return ResultUtils.success(tempApiClient.getRandomImage(params));
-        }else if (interfaceInfo.getName().equalsIgnoreCase("translate")) {
-            return ResultUtils.success(tempApiClient.translate(params));
+        } else if (interfaceInfoName.equalsIgnoreCase("translate")) {
+            Gson gson = new Gson();
+            HashMap paramsMap = gson.fromJson(params, HashMap.class);
+            String content = paramsMap.get("content").toString();
+            String toLanguage = paramsMap.get("toLanguage").toString();
+            return ResultUtils.success(tempApiClient.translate(content, toLanguage));
+        } else if (interfaceInfoName.equalsIgnoreCase("poisonousChickenSoup")) {
+            return ResultUtils.success(tempApiClient.poisonousChickenSoup());
         }
         return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
     }
-
 
 
     /**
