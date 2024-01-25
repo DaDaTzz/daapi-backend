@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 
 /**
  * 帖子接口
@@ -175,9 +176,14 @@ public class InterfaceInfoController {
         //TODO 需要动态传递url，然后选择调用哪个方法访问模拟接口（方案一：根据接口名称 判断调用哪个接口）
         if(interfaceInfo.getName().equalsIgnoreCase("getCurrentTime")){
             return ResultUtils.success(tempApiClient.getCurrentTime());
-        }
-        if(interfaceInfo.getName().equalsIgnoreCase("getChineseName")){
+        } else if (interfaceInfo.getName().equalsIgnoreCase("getChineseName")) {
             return ResultUtils.success(tempApiClient.getChineseName(params));
+        } else if (interfaceInfo.getName().equalsIgnoreCase("getAgeByBirthday")) {
+            return ResultUtils.success(tempApiClient.getAgeByBirthday(params));
+        } else if (interfaceInfo.getName().equalsIgnoreCase("getRandomImage")) {
+            return ResultUtils.success(tempApiClient.getRandomImage(params));
+        }else if (interfaceInfo.getName().equalsIgnoreCase("translate")) {
+            return ResultUtils.success(tempApiClient.translate(params));
         }
         return ResultUtils.error(ErrorCode.SYSTEM_ERROR);
     }
